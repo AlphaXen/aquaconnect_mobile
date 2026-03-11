@@ -5,6 +5,7 @@ import '../data/mock_data.dart';
 class AppProvider extends ChangeNotifier {
   AppUser? _currentUser;
   bool _isLoggedIn = false;
+  ThemeMode _themeMode = ThemeMode.system;
   List<Tank> _tanks = List.from(mockTanks);
   List<Reservation> _reservations = List.from(mockReservations);
   final List<Product> _products = List.from(mockProducts);
@@ -13,6 +14,7 @@ class AppProvider extends ChangeNotifier {
 
   AppUser? get currentUser => _currentUser;
   bool get isLoggedIn => _isLoggedIn;
+  ThemeMode get themeMode => _themeMode;
   List<Tank> get tanks => _tanks;
   List<Reservation> get reservations => _reservations;
   List<Product> get products => _products;
@@ -28,6 +30,11 @@ class AppProvider extends ChangeNotifier {
   void logout() {
     _currentUser = null;
     _isLoggedIn = false;
+    notifyListeners();
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
     notifyListeners();
   }
 

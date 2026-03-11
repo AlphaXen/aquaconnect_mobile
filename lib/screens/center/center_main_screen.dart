@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../widgets/app_toast.dart';
+import '../../widgets/settings_bottom_sheet.dart';
 import 'center_dashboard_screen.dart';
 import 'reservation_management_screen.dart';
 import 'inventory_screen.dart';
@@ -44,6 +45,11 @@ class _CenterMainScreenState extends State<CenterMainScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => showSettingsBottomSheet(context),
+            tooltip: '설정',
+          ),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logout, tooltip: '로그아웃'),
         ],
       ),
