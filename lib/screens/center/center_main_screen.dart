@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../widgets/app_toast.dart';
@@ -27,11 +28,37 @@ class _CenterMainScreenState extends State<CenterMainScreen> {
 
   void _logout() => context.read<AppProvider>().logout();
 
+  Future<bool> _onWillPop() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('종료'),
+        content: const Text('앱을 종료하시겠습니까?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('아니오')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('예')),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final toast = context.watch<AppProvider>().toast;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (_currentIndex != 0) {
+          setState(() => _currentIndex = 0);
+          return;
+        }
+        final shouldExit = await _onWillPop();
+        if (shouldExit) SystemNavigator.pop();
+      },
+      child: Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F766E),
         foregroundColor: Colors.white,
@@ -71,7 +98,7 @@ class _CenterMainScreenState extends State<CenterMainScreen> {
           NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: '구인 공고'),
         ],
       ),
-    );
+    ));
   }
 }
 
