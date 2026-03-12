@@ -8,7 +8,7 @@ class AppProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   List<Tank> _tanks = List.from(mockTanks);
   List<Reservation> _reservations = List.from(mockReservations);
-  final List<Product> _products = List.from(mockProducts);
+  List<Product> _products = List.from(mockProducts);
   List<Job> _jobs = List.from(mockJobs);
   ToastMessage? _toast;
 
@@ -144,6 +144,28 @@ class AppProvider extends ChangeNotifier {
     );
     _jobs = [..._jobs, newJob];
     showToast('구인 공고가 등록되었습니다.');
+    notifyListeners();
+  }
+
+  // Product operations
+  void updateProductStock(String id, int newStock) {
+    _products = _products.map((p) {
+      if (p.id == id) {
+        return p.copyWith(stock: newStock, available: newStock > 0);
+      }
+      return p;
+    }).toList();
+    showToast('재고가 업데이트되었습니다.');
+    notifyListeners();
+  }
+
+  void addProduct(Product product) {
+    final newProduct = product.copyWith(
+      id: 'prod_${DateTime.now().millisecondsSinceEpoch}',
+      centerId: 'center_001',
+    );
+    _products = [..._products, newProduct];
+    showToast('${product.name} 상품이 등록되었습니다.');
     notifyListeners();
   }
 

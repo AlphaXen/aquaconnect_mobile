@@ -218,6 +218,28 @@ class Product {
     required this.stock,
     required this.available,
   });
+
+  Product copyWith({
+    String? id,
+    String? centerId,
+    String? category,
+    String? name,
+    String? description,
+    int? price,
+    int? stock,
+    bool? available,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      centerId: centerId ?? this.centerId,
+      category: category ?? this.category,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      stock: stock ?? this.stock,
+      available: available ?? this.available,
+    );
+  }
 }
 
 class Job {
