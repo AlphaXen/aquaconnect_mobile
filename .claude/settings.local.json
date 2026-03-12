@@ -3,7 +3,8 @@
     "allow": [
       "Bash(flutter pub:*)",
       "Bash(flutter doctor:*)",
-      "Bash(flutter build:*)"
+      "Bash(flutter build:*)",
+      "Bash(flutter clean:*)"
     ]
   }
 }
