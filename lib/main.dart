@@ -70,3 +70,5 @@ class _AppRouter extends StatelessWidget {
         : const CenterMainScreen();
   }
 }
+
+// 이 코드는 가장 처음 실행되는 메인 코드입니다.
