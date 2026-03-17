@@ -4,6 +4,7 @@ import '../../providers/app_provider.dart';
 import '../../models/models.dart';
 import '../../widgets/status_badge.dart';
 import '../../utils/formatters.dart';
+import 'fish_gallery_screen.dart';
 
 class TankManagementScreen extends StatefulWidget {
   const TankManagementScreen({super.key});
@@ -180,6 +181,12 @@ class _TankCard extends StatelessWidget {
 
   const _TankCard({required this.tank, required this.onEdit, required this.onDelete});
 
+  void _openGallery(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => FishGalleryScreen(tankId: tank.id, tankName: tank.name),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final injuryRate = tank.totalFish > 0 ? (tank.injuredFish / tank.totalFish * 100).toStringAsFixed(1) : '0.0';
@@ -203,6 +210,13 @@ class _TankCard extends StatelessWidget {
                   ],
                 ),
               ),
+              IconButton(
+                onPressed: () => _openGallery(context),
+                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                style: IconButton.styleFrom(backgroundColor: const Color(0xFFFFF7ED), foregroundColor: const Color(0xFFEA580C)),
+                tooltip: '불량어류 사진',
+              ),
+              const SizedBox(width: 6),
               IconButton(
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit_outlined, size: 18),

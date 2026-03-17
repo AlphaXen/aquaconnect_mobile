@@ -4,7 +4,9 @@
       "Bash(flutter pub:*)",
       "Bash(flutter doctor:*)",
       "Bash(flutter build:*)",
-      "Bash(flutter clean:*)"
+      "Bash(flutter clean:*)",
+      "Bash(find d:/flutter/aquaconnect_mobile/lib/screens -type f -name *tank* -o -name *suju* -o -name *aquarium*)",
+      "Bash(grep -r \"tank\\\\|수조\" d:/flutter/aquaconnect_mobile/lib --include=*.dart -l)"
     ]
   }
 }
