@@ -1,6 +1,6 @@
 """
 AquaConnect 불량어류 사진 서버 (젯슨 나노용)
-실행: uvicorn server:app --host 0.0.0.0 --port 8000
+실행: python3 -m uvicorn server:app --host 0.0.0.0 --port 8000
 
 폴더 구조:
   photos/
@@ -11,14 +11,25 @@ AquaConnect 불량어류 사진 서버 (젯슨 나노용)
       ...
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pathlib import Path
 from datetime import datetime
-import os
 
-app = FastAPI(title="AquaConnect Photo Server")
+# 사진 저장 경로 (실제 환경에 맞게 수정)
+PHOTOS_DIR = Path("./photos")
+SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".bmp"}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    PHOTOS_DIR.mkdir(exist_ok=True)
+    yield
+
+
+app = FastAPI(title="AquaConnect Photo Server", lifespan=lifespan)
 
 # CORS 허용 (Flutter 앱에서 접근 가능하도록)
 app.add_middleware(
@@ -28,24 +39,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 사진 저장 경로 (실제 환경에 맞게 수정)
-PHOTOS_DIR = Path("./photos")
-SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".bmp"}
-
-
-def ensure_photos_dir():
-    PHOTOS_DIR.mkdir(exist_ok=True)
-
-
-@app.on_event("startup")
-async def startup():
-    ensure_photos_dir()
-
 
 @app.get("/api/tanks")
 async def list_tanks():
     """사진이 있는 수조 목록 반환"""
-    ensure_photos_dir()
     tanks = []
     for d in sorted(PHOTOS_DIR.iterdir()):
         if d.is_dir():
