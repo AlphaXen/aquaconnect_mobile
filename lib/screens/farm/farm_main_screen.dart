@@ -9,6 +9,7 @@ import 'tank_management_screen.dart';
 import 'reservation_screen.dart';
 import 'commerce_screen.dart';
 import 'farm_jobs_screen.dart';
+import 'farm_profile_screen.dart';
 
 class FarmMainScreen extends StatefulWidget {
   const FarmMainScreen({super.key});
@@ -26,6 +27,7 @@ class _FarmMainScreenState extends State<FarmMainScreen> {
     ReservationScreen(),
     CommerceScreen(),
     FarmJobsScreen(),
+    FarmProfileScreen(),
   ];
 
   void _logout() {
@@ -105,6 +107,7 @@ class _FarmMainScreenState extends State<FarmMainScreen> {
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: '예약 신청'),
           NavigationDestination(icon: Icon(Icons.shopping_cart_outlined), selectedIcon: Icon(Icons.shopping_cart), label: '쇼핑몰'),
           NavigationDestination(icon: Icon(Icons.work_outline), selectedIcon: Icon(Icons.work), label: '구인 공고'),
+          NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: '내 정보'),
         ],
       ),
     ));

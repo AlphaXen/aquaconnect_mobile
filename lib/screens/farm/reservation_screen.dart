@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../../models/models.dart';
-import '../../data/mock_data.dart';
 import '../../widgets/status_badge.dart';
 import '../../utils/formatters.dart';
 
@@ -32,6 +31,18 @@ class _ReservationScreenState extends State<ReservationScreen> {
   List<String> _selectedTanks = [];
   String _notes = '';
   Reservation? _submitted;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prov = context.read<AppProvider>();
+      final userId = prov.currentUser?.id ?? '';
+      prov.loadCenters();
+      prov.loadReservationsForFarm(userId);
+    });
+  }
 
   int get _serviceAmount => _serviceTypes.firstWhere((s) => s.$1 == _serviceType).$3;
   int get _commissionAmount => (_serviceAmount * 0.10).round();
@@ -51,22 +62,24 @@ class _ReservationScreenState extends State<ReservationScreen> {
     });
   }
 
-  void _submit(BuildContext context, List<Tank> myTanks) {
-    final res = context.read<AppProvider>().createReservation(
+  Future<void> _submit(BuildContext context, List<Tank> myTanks) async {
+    setState(() => _isSubmitting = true);
+    final res = await context.read<AppProvider>().createReservationApi(
       centerId: _centerId, centerName: _centerName,
       scheduledDate: _date, scheduledTime: _time,
       selectedTanks: _selectedTanks, serviceType: _serviceType,
       totalFish: _totalFishSelected(myTanks), notes: _notes,
       serviceAmount: _serviceAmount, commissionAmount: _commissionAmount,
     );
-    setState(() => _submitted = res);
+    if (mounted) setState(() { _submitted = res; _isSubmitting = false; });
   }
 
   @override
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
-    final myTanks = prov.tanks.where((t) => t.farmId == 'farm_001').toList();
-    final myRes = prov.reservations.where((r) => r.farmId == 'farm_001').toList().reversed.toList();
+    final userId = prov.currentUser?.id ?? 'farm_001';
+    final myTanks = prov.tanks.where((t) => t.farmId == userId).toList();
+    final myRes = prov.reservations.where((r) => r.farmId == userId).toList().reversed.toList();
 
     if (_submitted != null) return _SuccessView(res: _submitted!, serviceLabel: _serviceLabel, commissionAmount: _commissionAmount, netAmount: _netAmount, onDone: _reset);
 
@@ -99,6 +112,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
               selectedTanks: _selectedTanks,
               notes: _notes,
               myTanks: myTanks,
+              centers: prov.centers,
               serviceAmount: _serviceAmount,
               commissionAmount: _commissionAmount,
               netAmount: _netAmount,
@@ -131,6 +145,7 @@ class _StepForm extends StatelessWidget {
   final String centerId, centerName, date, time, serviceType, notes, serviceLabel;
   final List<String> selectedTanks;
   final List<Tank> myTanks;
+  final List<AquaCenter> centers;
   final int serviceAmount, commissionAmount, netAmount, totalFishSelected;
   final void Function(String, String) onSelectCenter;
   final void Function(String) onSelectDate, onSelectTime, onSelectService, onNotesChange;
@@ -141,6 +156,7 @@ class _StepForm extends StatelessWidget {
     required this.step, required this.centerId, required this.centerName,
     required this.date, required this.time, required this.serviceType,
     required this.selectedTanks, required this.notes, required this.myTanks,
+    required this.centers,
     required this.serviceAmount, required this.commissionAmount, required this.netAmount,
     required this.totalFishSelected, required this.serviceLabel,
     required this.onSelectCenter, required this.onSelectDate, required this.onSelectTime,
@@ -174,7 +190,7 @@ class _StepForm extends StatelessWidget {
           })),
           const SizedBox(height: 20),
 
-          if (step == 1) _Step1(centerId: centerId, onSelect: onSelectCenter, onNext: onNext),
+          if (step == 1) _Step1(centerId: centerId, centers: centers, onSelect: onSelectCenter, onNext: onNext),
           if (step == 2) _Step2(date: date, time: time, serviceType: serviceType, notes: notes, onDate: onSelectDate, onTime: onSelectTime, onService: onSelectService, onNotes: onNotesChange, onNext: onNext, onBack: onBack),
           if (step == 3) _Step3(myTanks: myTanks, selectedTanks: selectedTanks, onToggle: onToggleTank, centerName: centerName, date: date, time: time, serviceLabel: serviceLabel, serviceAmount: serviceAmount, commissionAmount: commissionAmount, netAmount: netAmount, totalFish: totalFishSelected, tankCount: selectedTanks.length, onBack: onBack, onSubmit: onSubmit),
         ],
@@ -185,10 +201,11 @@ class _StepForm extends StatelessWidget {
 
 class _Step1 extends StatelessWidget {
   final String centerId;
+  final List<AquaCenter> centers;
   final void Function(String, String) onSelect;
   final VoidCallback onNext;
 
-  const _Step1({required this.centerId, required this.onSelect, required this.onNext});
+  const _Step1({required this.centerId, required this.centers, required this.onSelect, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +214,7 @@ class _Step1 extends StatelessWidget {
       children: [
         const Text('수산질병관리원 선택', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1F2937))),
         const SizedBox(height: 12),
-        ...mockCenters.map((c) => GestureDetector(
+        ...centers.map((c) => GestureDetector(
           onTap: () => onSelect(c.id, c.name),
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),

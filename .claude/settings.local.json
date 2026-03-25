@@ -6,7 +6,25 @@
       "Bash(flutter build:*)",
       "Bash(flutter clean:*)",
       "Bash(find d:/flutter/aquaconnect_mobile/lib/screens -type f -name *tank* -o -name *suju* -o -name *aquarium*)",
-      "Bash(grep -r \"tank\\\\|수조\" d:/flutter/aquaconnect_mobile/lib --include=*.dart -l)"
+      "Bash(grep -r \"tank\\\\|수조\" d:/flutter/aquaconnect_mobile/lib --include=*.dart -l)",
+      "Bash(xargs grep:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8000/api/profiles/centers)",
+      "Bash(curl -s http://localhost:8000/api/reservations/center/center_001)",
+      "Bash(ipconfig)",
+      "Bash(findstr \"IPv4\")",
+      "Bash(find /d/flutter/aquaconnect_mobile -type f \\\\\\(-name *.js -o -name *.ts \\\\\\) ! -path */node_modules/* ! -path */.dart/*)",
+      "Bash(find /d/flutter/aquaconnect_mobile -type f \\\\\\(-name *.dart -o -name Dockerfile -o -name docker-compose.yml \\\\\\))",
+      "Bash(find /d/flutter/aquaconnect_mobile -name *.py -type f)",
+      "Bash(netstat -aon)",
+      "Bash(findstr \":8000 \")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(python -c \"import socket; s=socket.socket\\(\\); r=s.bind\\(\\(''0.0.0.0'',8000\\)\\); print\\(''8000 OK''\\); s.close\\(\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(flutter analyze:*)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

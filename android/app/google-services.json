@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "614591671338",
+    "project_id": "aqua-connect-613bf",
+    "storage_bucket": "aqua-connect-613bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:614591671338:android:e41c77f889c89d7e88e753",
+        "android_client_info": {
+          "package_name": "com.example.aquaconnect_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "614591671338-8qcp2oq0ku9ubijubepcu0a071llnbq1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aquaconnect_mobile",
+            "certificate_hash": "21d00024ad5662e824a86bbad8239897ce8e4bb5"
+          }
+        },
+        {
+          "client_id": "614591671338-nngf8fpkmfgohckuk3vb6cqqn5gjse7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8m4qcIR4rr4gXpAgQvpIG0-yqgI6Mr8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "614591671338-nngf8fpkmfgohckuk3vb6cqqn5gjse7r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

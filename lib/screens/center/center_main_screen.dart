@@ -8,6 +8,7 @@ import 'center_dashboard_screen.dart';
 import 'reservation_management_screen.dart';
 import 'inventory_screen.dart';
 import 'center_jobs_screen.dart';
+import 'center_profile_screen.dart';
 
 class CenterMainScreen extends StatefulWidget {
   const CenterMainScreen({super.key});
@@ -24,6 +25,7 @@ class _CenterMainScreenState extends State<CenterMainScreen> {
     ReservationManagementScreen(),
     InventoryScreen(),
     CenterJobsScreen(),
+    CenterProfileScreen(),
   ];
 
   void _logout() => context.read<AppProvider>().logout();
@@ -96,6 +98,7 @@ class _CenterMainScreenState extends State<CenterMainScreen> {
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: '예약 관리'),
           NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: '재고 관리'),
           NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: '구인 공고'),
+          NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: '내 정보'),
         ],
       ),
     ));

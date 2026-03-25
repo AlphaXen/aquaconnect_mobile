@@ -22,6 +22,15 @@ class ReservationManagementScreen extends StatefulWidget {
 class _ReservationManagementScreenState extends State<ReservationManagementScreen> {
   String _filter = 'pending';
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final centerId = context.read<AppProvider>().currentUser?.id ?? '';
+      context.read<AppProvider>().loadReservationsForCenter(centerId);
+    });
+  }
+
   void _showActionDialog(BuildContext context, Reservation res, String action) {
     final notesController = TextEditingController();
     showModalBottomSheet(
@@ -91,7 +100,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    context.read<AppProvider>().updateReservationStatus(res.id, action, notes: notesController.text);
+                    context.read<AppProvider>().updateReservationStatusApi(res.id, action, notes: notesController.text);
                     Navigator.pop(ctx);
                   },
                   icon: Icon(action == 'approved' ? Icons.check : Icons.close, size: 18),
@@ -114,7 +123,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   @override
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
-    final allRes = prov.reservations;
+    final centerId = prov.currentUser?.id ?? '';
+    final allRes = prov.reservations.where((r) => r.centerId == centerId).toList();
     final filtered = _filter == 'all' ? allRes : allRes.where((r) => r.status == _filter).toList();
     final pendingCount = allRes.where((r) => r.status == 'pending').length;
 
@@ -189,7 +199,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
                       res: r,
                       onApprove: () => _showActionDialog(context, r, 'approved'),
                       onReject: () => _showActionDialog(context, r, 'rejected'),
-                      onComplete: () => context.read<AppProvider>().updateReservationStatus(r.id, 'completed'),
+                      onComplete: () => context.read<AppProvider>().updateReservationStatusApi(r.id, 'completed'),
                     );
                   },
                 ),

@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'providers/app_provider.dart';
 import 'screens/login_screen.dart';
+import 'screens/role_selection_screen.dart';
 import 'screens/farm/farm_main_screen.dart';
 import 'screens/center/center_main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await initializeDateFormatting('ko_KR', null);
+
+  final appProvider = AppProvider();
+  await appProvider.initialize();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppProvider(),
+    ChangeNotifierProvider.value(
+      value: appProvider,
       child: const AquaConnectApp(),
     ),
   );
@@ -63,8 +70,13 @@ class _AppRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
 
-    if (!prov.isLoggedIn) return const LoginScreen();
+    // Firebase 로그인 안 됨 → 로그인 화면
+    if (!prov.isFirebaseLoggedIn) return const LoginScreen();
 
+    // Firebase 로그인은 됐지만 역할 미선택 → 역할 선택 화면
+    if (!prov.isLoggedIn) return const RoleSelectionScreen();
+
+    // 역할까지 선택 완료 → 메인 화면
     return prov.currentUser?.role == 'farm'
         ? const FarmMainScreen()
         : const CenterMainScreen();
