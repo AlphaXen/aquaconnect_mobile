@@ -24,7 +24,8 @@
       "Bash(python -c \"import socket; s=socket.socket\\(\\); r=s.bind\\(\\(''0.0.0.0'',8000\\)\\); print\\(''8000 OK''\\); s.close\\(\\)\")",
       "Bash(python -c \":*)",
       "Bash(flutter analyze:*)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(grep -E \"\\\\.dart$\")"
     ]
   }
 }

@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/server_config.dart';
+import '../screens/farm/farm_profile_screen.dart';
+import '../screens/center/center_profile_screen.dart';
 
 void showSettingsBottomSheet(BuildContext context) {
+  final navigator = Navigator.of(context);
+  final role = context.read<AppProvider>().currentUser?.role;
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (ctx) => const _SettingsSheet(),
+    builder: (ctx) => _SettingsSheet(navigator: navigator, role: role),
   );
 }
 
 class _SettingsSheet extends StatefulWidget {
-  const _SettingsSheet();
+  final NavigatorState navigator;
+  final String? role;
+
+  const _SettingsSheet({required this.navigator, required this.role});
 
   @override
   State<_SettingsSheet> createState() => _SettingsSheetState();
@@ -169,6 +176,40 @@ class _SettingsSheetState extends State<_SettingsSheet> {
               label: '켜기 (다크 모드)',
               selected: current == ThemeMode.dark,
               onTap: () => prov.setThemeMode(ThemeMode.dark),
+            ),
+
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 12),
+
+            // 내 정보
+            Row(
+              children: [
+                const Icon(Icons.person_outline, size: 16, color: Color(0xFF6B7280)),
+                const SizedBox(width: 6),
+                const Text('내 정보', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('프로필 수정'),
+              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onTap: () {
+                Navigator.pop(context);
+                widget.navigator.push(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('내 정보')),
+                      body: widget.role == 'farm'
+                          ? const FarmProfileScreen()
+                          : const CenterProfileScreen(),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
