@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AquaConnect 구인구직</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --blue:#2563EB;--blue-l:#EFF6FF;
+      --teal:#0F766E;--teal-l:#F0FDFA;
+      --amber:#D97706;--amber-l:#FFFBEB;
+      --purple:#7C3AED;--purple-l:#F5F3FF;
+      --green:#16A34A;--green-l:#F0FDF4;
+      --red:#DC2626;--red-l:#FEF2F2;
+      --bg:#F9FAFB;--card:#fff;
+      --t1:#1F2937;--t2:#6B7280;--t3:#9CA3AF;
+      --border:#E5E7EB;
+      --hh:56px;--bnh:64px;
+    }
+    body{
+      font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;
+      background:var(--bg);color:var(--t1);
+      max-width:480px;margin:0 auto;
+      min-height:100vh;overflow-x:hidden;
+      padding-bottom:var(--bnh);
+    }
+
+    /* ── Header ─────────────────── */
+    .header{
+      position:sticky;top:0;z-index:100;
+      background:#fff;border-bottom:1px solid var(--border);
+      height:var(--hh);display:flex;align-items:center;
+      padding:0 16px;gap:8px;
+    }
+    .header-logo{font-size:24px}
+    .header-brand{font-weight:900;font-size:17px;color:var(--t1)}
+    .header-tag{
+      font-size:11px;font-weight:700;
+      background:var(--blue-l);color:var(--blue);
+      padding:2px 10px;border-radius:20px;margin-left:2px;
+    }
+
+    /* ── Bottom Nav ──────────────── */
+    .bnav{
+      position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+      width:100%;max-width:480px;height:var(--bnh);
+      background:#fff;border-top:1px solid var(--border);
+      display:flex;align-items:stretch;z-index:100;
+    }
+    .bnav-item{
+      flex:1;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:2px;
+      border:none;background:none;font-family:inherit;
+      cursor:pointer;color:var(--t3);transition:color .15s;
+    }
+    .bnav-item.on{color:var(--blue)}
+    .bnav-icon{font-size:22px;line-height:1}
+    .bnav-label{font-size:10px;font-weight:700}
+
+    /* ── Tabs ────────────────────── */
+    .tab{display:none}
+    .tab.on{display:block}
+
+    /* ── Search / Filter ─────────── */
+    .search-bar{
+      position:sticky;top:var(--hh);z-index:90;
+      background:#fff;border-bottom:1px solid var(--border);
+      padding:12px 16px 10px;
+    }
+    .si-wrap{position:relative;margin-bottom:10px}
+    .si-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--t3)}
+    .si{
+      width:100%;padding:10px 12px 10px 36px;
+      border:1.5px solid var(--border);border-radius:12px;
+      font-size:14px;font-family:inherit;color:var(--t1);
+      background:var(--bg);outline:none;transition:border-color .2s;
+    }
+    .si:focus{border-color:var(--blue);background:#fff}
+    .chips{
+      display:flex;gap:6px;overflow-x:auto;
+      padding-bottom:2px;scrollbar-width:none;
+    }
+    .chips::-webkit-scrollbar{display:none}
+    .chip{
+      flex-shrink:0;padding:5px 12px;
+      border-radius:20px;font-size:12px;font-weight:700;
+      cursor:pointer;border:1.5px solid var(--border);
+      background:#fff;color:var(--t2);transition:all .15s;
+      font-family:inherit;
+    }
+    .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+    .rchip{
+      flex-shrink:0;padding:4px 10px;
+      border-radius:20px;font-size:11px;font-weight:700;
+      cursor:pointer;border:1.5px solid var(--border);
+      background:#fff;color:var(--t2);transition:all .15s;
+      font-family:inherit;
+    }
+    .rchip.on{background:var(--amber-l);border-color:var(--amber);color:var(--amber)}
+    .rchips{
+      display:flex;gap:6px;overflow-x:auto;
+      margin-top:6px;padding-bottom:2px;scrollbar-width:none;
+    }
+    .rchips::-webkit-scrollbar{display:none}
+
+    /* ── Sort bar ────────────────── */
+    .sort-bar{
+      display:flex;align-items:center;
+      justify-content:space-between;
+      padding:10px 16px 6px;
+    }
+    .sort-count{font-size:13px;color:var(--t2);font-weight:600}
+    .sort-count b{color:var(--blue);font-weight:900}
+    .sort-sel{
+      font-size:12px;font-family:inherit;font-weight:700;
+      color:var(--t2);border:1.5px solid var(--border);
+      border-radius:8px;padding:4px 8px;background:#fff;
+      cursor:pointer;outline:none;
+    }
+
+    /* ── Job list ────────────────── */
+    .jlist{padding:0 16px 16px}
+
+    /* ── Job card ────────────────── */
+    .jcard{
+      background:#fff;border-radius:16px;
+      border:1px solid var(--border);padding:16px;
+      margin-bottom:12px;cursor:pointer;
+      transition:box-shadow .2s,transform .1s;
+    }
+    .jcard:active{transform:scale(.99)}
+    .jcard-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+    .jcard-meta{flex:1}
+    .jcard-badges{display:flex;gap:5px;margin-bottom:3px;flex-wrap:wrap}
+    .badge{
+      font-size:10px;font-weight:700;
+      padding:2px 8px;border-radius:20px;
+    }
+    .badge-open{background:var(--teal-l);color:var(--teal)}
+    .badge-type{background:var(--blue-l);color:var(--blue)}
+    .jcard-title{font-size:16px;font-weight:900;color:var(--t1);line-height:1.3;margin-bottom:2px}
+    .jcard-co{font-size:12px;color:var(--t2);font-weight:600}
+    .jcard-emoji{font-size:32px;line-height:1}
+    .jcard-desc{
+      font-size:13px;color:var(--t2);line-height:1.5;
+      margin-bottom:10px;
+      display:-webkit-box;-webkit-line-clamp:2;
+      -webkit-box-orient:vertical;overflow:hidden;
+    }
+
+    /* ── Info grid ───────────────── */
+    .igrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+    .ibox{padding:8px 10px;border-radius:10px}
+    .ibox-label{
+      font-size:10px;font-weight:700;
+      margin-bottom:2px;display:flex;align-items:center;gap:3px;
+    }
+    .ibox-val{font-size:12px;font-weight:700;color:var(--t1)}
+    .ibox-sub{font-size:10px;color:var(--t3)}
+
+    /* ── Skills ──────────────────── */
+    .skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+    .sk{
+      font-size:11px;font-weight:700;
+      padding:3px 9px;border-radius:20px;
+      background:var(--teal-l);color:var(--teal);
+    }
+
+    /* ── Buttons ─────────────────── */
+    .btn-apply{
+      width:100%;padding:12px;border-radius:12px;
+      border:none;font-size:14px;font-weight:700;
+      font-family:inherit;cursor:pointer;transition:all .2s;
+    }
+    .btn-apply.no{background:var(--blue);color:#fff}
+    .btn-apply.yes{background:var(--green-l);color:var(--green)}
+    .btn-apply.yes:active,.btn-apply.no:active{opacity:.85}
+    .btn-primary{
+      width:100%;padding:14px;border-radius:13px;
+      border:none;font-size:15px;font-weight:700;
+      font-family:inherit;cursor:pointer;
+      background:var(--teal);color:#fff;
+      transition:opacity .2s;margin-top:8px;
+    }
+    .btn-primary:active{opacity:.85}
+
+    /* ── Empty state ─────────────── */
+    .empty{text-align:center;padding:60px 20px}
+    .empty-icon{font-size:60px;margin-bottom:12px}
+    .empty-txt{font-size:15px;color:var(--t3);font-weight:600}
+
+    /* ── Modal overlay ───────────── */
+    .overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.5);
+      z-index:200;display:none;
+      align-items:flex-end;justify-content:center;
+    }
+    .overlay.on{display:flex}
+    .modal{
+      background:#fff;border-radius:24px 24px 0 0;
+      width:100%;max-width:480px;
+      max-height:92vh;overflow-y:auto;
+      padding:20px 20px 48px;
+      transform:translateY(100%);
+      transition:transform .28s cubic-bezier(.32,.72,0,1);
+    }
+    .overlay.on .modal{transform:translateY(0)}
+    .modal-handle{
+      width:40px;height:4px;background:var(--border);
+      border-radius:4px;margin:0 auto 18px;
+    }
+    .modal-close{
+      position:absolute;top:20px;right:20px;
+      font-size:20px;cursor:pointer;
+      background:var(--bg);border:none;
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:inherit;color:var(--t2);
+    }
+    .modal-inner{position:relative}
+
+    /* ── Detail modal ────────────── */
+    .detail-head{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+    .detail-emoji{font-size:48px;line-height:1;flex-shrink:0}
+    .detail-title{font-size:20px;font-weight:900;margin-bottom:4px;line-height:1.3}
+    .detail-co{font-size:14px;color:var(--t2);font-weight:600}
+    .section-title{
+      font-size:13px;font-weight:900;color:var(--t1);
+      margin-bottom:8px;margin-top:14px;
+    }
+    .detail-desc{
+      font-size:14px;color:var(--t2);line-height:1.65;
+      padding:12px;background:var(--bg);border-radius:12px;
+      margin-bottom:2px;
+    }
+    .contact-box{
+      display:flex;align-items:center;gap:10px;
+      background:var(--bg);padding:12px;border-radius:12px;
+      margin-bottom:14px;
+    }
+
+    /* ── Post form ───────────────── */
+    .post-form{padding:16px}
+    .form-h{font-size:22px;font-weight:900;margin-bottom:4px}
+    .form-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+    .fg{margin-bottom:13px}
+    .flabel{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:5px;display:block}
+    .fi,.fs,.fta{
+      width:100%;padding:11px 13px;
+      border:1.5px solid var(--border);border-radius:12px;
+      font-size:14px;font-family:inherit;color:var(--t1);
+      background:#fff;outline:none;transition:border-color .2s;
+    }
+    .fi:focus,.fs:focus,.fta:focus{border-color:var(--blue)}
+    .fta{resize:none;min-height:96px;line-height:1.5}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    /* ── My apps ─────────────────── */
+    .myapps{padding:16px}
+    .myapps-h{margin-bottom:16px}
+    .apcard{
+      background:#fff;border-radius:14px;
+      border:1px solid var(--border);padding:14px;margin-bottom:10px;
+    }
+    .apcard-top{
+      display:flex;align-items:flex-start;
+      justify-content:space-between;margin-bottom:8px;
+    }
+    .ap-status{
+      font-size:11px;font-weight:700;
+      padding:3px 10px;border-radius:20px;flex-shrink:0;
+    }
+    .st-applied{background:var(--blue-l);color:var(--blue)}
+    .divider{border:none;border-top:1px solid var(--border);margin:10px 0}
+
+    /* ── Toast ───────────────────── */
+    .toast{
+      position:fixed;
+      bottom:calc(var(--bnh) + 12px);
+      left:50%;transform:translateX(-50%) translateY(80px);
+      background:var(--t1);color:#fff;
+      padding:10px 20px;border-radius:25px;
+      font-size:13px;font-weight:600;z-index:1000;
+      transition:transform .28s ease;white-space:nowrap;
+      max-width:90%;pointer-events:none;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    .toast.ok{background:var(--teal)}
+    .toast.err{background:var(--red)}
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────── -->
+<header class="header">
+  <span class="header-logo">🐟</span>
+  <span class="header-brand">AquaConnect</span>
+  <span class="header-tag">구인구직</span>
+</header>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- TAB: 구인공고                                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="tab-jobs" class="tab on">
+
+  <!-- Search & Filter -->
+  <div class="search-bar">
+    <div class="si-wrap">
+      <span class="si-icon">🔍</span>
+      <input class="si" id="si" type="text" placeholder="직종, 지역, 기관명으로 검색" oninput="onSearch(this.value)">
+    </div>
+    <div class="chips" id="typeChips"></div>
+    <div class="rchips" id="regionChips"></div>
+  </div>
+
+  <!-- Sort bar -->
+  <div class="sort-bar">
+    <div class="sort-count">전체 <b id="jCount">0</b>건</div>
+    <select class="sort-sel" onchange="onSort(this.value)">
+      <option>최신순</option>
+      <option>급여순</option>
+      <option>마감임박순</option>
+    </select>
+  </div>
+
+  <!-- Job list -->
+  <div class="jlist" id="jlist"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- TAB: 공고등록                                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="tab-post" class="tab">
+  <form class="post-form" onsubmit="submitPost(event)">
+    <div class="form-h">구인 공고 등록</div>
+    <div class="form-sub">어촌 일자리 공고를 올려보세요</div>
+
+    <div class="fg">
+      <label class="flabel">공고 제목 *</label>
+      <input class="fi" id="pt" placeholder="예: 넙치 백신 접종 보조 인력 모집" required>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="flabel">기관/업체명 *</label>
+        <input class="fi" id="pco" placeholder="기관명" required>
+      </div>
+      <div class="fg">
+        <label class="flabel">직종 *</label>
+        <select class="fs" id="pty">
+          <option>어류방역</option>
+          <option>양식장관리</option>
+          <option>수산물가공</option>
+          <option>해양조사</option>
+          <option>기타</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="flabel">업무 내용</label>
+      <textarea class="fta" id="pd" placeholder="업무 내용을 자세히 적어주세요"></textarea>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="flabel">시작일</label>
+        <input class="fi" id="ps" type="date">
+      </div>
+      <div class="fg">
+        <label class="flabel">종료일</label>
+        <input class="fi" id="pe" type="date">
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="flabel">급여 *</label>
+        <input class="fi" id="pw" type="number" placeholder="150000" required>
+      </div>
+      <div class="fg">
+        <label class="flabel">급여 유형</label>
+        <select class="fs" id="pwt">
+          <option>일당</option>
+          <option>월급</option>
+          <option>시급</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="flabel">근무 위치 *</label>
+        <input class="fi" id="pl" placeholder="예: 제주시 한림읍" required>
+      </div>
+      <div class="fg">
+        <label class="flabel">연락처 *</label>
+        <input class="fi" id="pc" type="tel" placeholder="010-1234-5678" required>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="flabel">필요 기술 <span style="color:var(--t3);font-weight:500">(쉼표 구분)</span></label>
+      <input class="fi" id="psk" placeholder="예: 수산질병관리사, 백신 접종">
+    </div>
+
+    <button type="submit" class="btn-primary">공고 등록하기</button>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- TAB: 내지원현황                                        -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="tab-myapps" class="tab">
+  <div class="myapps" id="myapps"></div>
+</div>
+
+<!-- ── Bottom Nav ──────────────────────────────────────── -->
+<nav class="bnav">
+  <button class="bnav-item on" onclick="goTab('jobs',this)">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-label">구인공고</span>
+  </button>
+  <button class="bnav-item" onclick="goTab('post',this)">
+    <span class="bnav-icon">➕</span>
+    <span class="bnav-label">공고등록</span>
+  </button>
+  <button class="bnav-item" onclick="goTab('myapps',this)">
+    <span class="bnav-icon">👤</span>
+    <span class="bnav-label">내지원현황</span>
+  </button>
+</nav>
+
+<!-- ── Job Detail Modal ────────────────────────────────── -->
+<div class="overlay" id="detailOv" onclick="closeOv('detailOv',event)">
+  <div class="modal" style="max-height:94vh">
+    <div class="modal-inner">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeOv('detailOv')">✕</button>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Apply Modal ─────────────────────────────────────── -->
+<div class="overlay" id="applyOv" onclick="closeOv('applyOv',event)">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeOv('applyOv')">✕</button>
+      <div id="applyBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── Data ──────────────────────────────────────────────── */
+const JOBS = [
+  {
+    id:'j1',centerName:'제주 수산질병관리원',centerId:'c1',
+    title:'넙치 백신 접종 보조 인력',type:'어류방역',
+    description:'제주 한림 지역 넙치 양식장에서 백신 접종 보조 업무를 담당합니다. 수산질병관리사 지도하에 작업하며 숙박비 지원됩니다. 경험자 우대합니다.',
+    startDate:'2026-05-01',endDate:'2026-05-31',
+    location:'제주시 한림읍',wage:150000,wageType:'일당',
+    skills:['수산질병관리사','백신 접종','넙치 양식'],
+    appliedCount:3,status:'open',contact:'064-123-4567',
+    emoji:'🐟',createdAt:'2026-04-25',
+  },
+  {
+    id:'j2',centerName:'완도 해양수산연구원',centerId:'c2',
+    title:'전복 양식장 수중 관리 인력',type:'양식장관리',
+    description:'전복 양식장 수중 시설 점검 및 먹이 공급 업무입니다. 스쿠버 다이빙 자격증 소지자 우대. 경력 무관 지원 가능합니다.',
+    startDate:'2026-05-15',endDate:'2026-07-15',
+    location:'전남 완도군',wage:130000,wageType:'일당',
+    skills:['스쿠버 다이빙','전복 양식','수중 작업'],
+    appliedCount:7,status:'open',contact:'061-550-1234',
+    emoji:'🦪',createdAt:'2026-04-24',
+  },
+  {
+    id:'j3',centerName:'통영 수산물 가공업체',centerId:'c3',
+    title:'굴 가공 및 위생 포장 인력',type:'수산물가공',
+    description:'굴 껍데기 제거 및 위생 포장 업무입니다. 일 8시간 근무이며 점심 식사를 제공합니다. 주 5일 근무 기준.',
+    startDate:'2026-05-01',endDate:'2026-06-30',
+    location:'경남 통영시',wage:110000,wageType:'일당',
+    skills:['수산물 가공','위생 관리','포장 작업'],
+    appliedCount:12,status:'open',contact:'055-641-5678',
+    emoji:'🦪',createdAt:'2026-04-23',
+  },
+  {
+    id:'j4',centerName:'여수 해양조사연구소',centerId:'c4',
+    title:'해양 수질 모니터링 보조 연구원',type:'해양조사',
+    description:'연안 해양 수질 측정 및 데이터 기록 업무를 담당합니다. 이학 계열 전공자 또는 관련 자격증 소지자 우대합니다.',
+    startDate:'2026-06-01',endDate:'2026-08-31',
+    location:'전남 여수시',wage:2800000,wageType:'월급',
+    skills:['수질 분석','데이터 기록','현장 조사'],
+    appliedCount:5,status:'open',contact:'061-690-3456',
+    emoji:'🔬',createdAt:'2026-04-22',
+  },
+  {
+    id:'j5',centerName:'부산 참치 양식연구소',centerId:'c5',
+    title:'참다랑어 사료 공급 및 건강 체크',type:'양식장관리',
+    description:'해상 가두리 양식장에서 참다랑어 사료 공급 및 이상 개체 선별 업무. 선박 운항 가능자 우대합니다.',
+    startDate:'2026-05-10',endDate:'2026-09-30',
+    location:'부산 기장군',wage:140000,wageType:'일당',
+    skills:['어류 건강 체크','선박 운항','사료 관리'],
+    appliedCount:2,status:'open',contact:'051-720-9012',
+    emoji:'🐡',createdAt:'2026-04-27',
+  },
+  {
+    id:'j6',centerName:'강원 연어양식협동조합',centerId:'c6',
+    title:'연어 치어 방류 및 부화장 관리',type:'어류방역',
+    description:'연어 치어 방류 행사 진행 보조 및 부화장 일상 관리 업무입니다. 초보자도 지원 가능하며 교육 제공.',
+    startDate:'2026-04-28',endDate:'2026-05-20',
+    location:'강원 양양군',wage:120000,wageType:'일당',
+    skills:['어류 관리','치어 방류','부화장 운영'],
+    appliedCount:4,status:'open',contact:'033-671-3456',
+    emoji:'🐠',createdAt:'2026-04-28',
+  },
+  {
+    id:'j7',centerName:'제주 성게 채취 협회',centerId:'c7',
+    title:'성게 채취 및 선별 작업자',type:'수산물가공',
+    description:'제주 해안 성게 채취 및 선별, 포장 업무입니다. 해녀 자격 소지자 또는 수중 작업 경험자 우대. 작업 장비는 지급됩니다.',
+    startDate:'2026-05-01',endDate:'2026-06-15',
+    location:'제주시 구좌읍',wage:160000,wageType:'일당',
+    skills:['수중 작업','성게 선별','해산물 포장'],
+    appliedCount:8,status:'open',contact:'064-783-5678',
+    emoji:'🦔',createdAt:'2026-04-15',
+  },
+  {
+    id:'j8',centerName:'인천 서해 수산연구원',centerId:'c8',
+    title:'꽃게 어획 및 항구 운반 인력',type:'기타',
+    description:'꽃게 어선 동행 어획 지원 및 항구 운반 업무입니다. 체력 우수자 우대하며 1일 기준 실적에 따라 추가 수당 지급.',
+    startDate:'2026-05-20',endDate:'2026-06-30',
+    location:'인천 강화군',wage:180000,wageType:'일당',
+    skills:['선박 이해','어획 작업','체력 필요'],
+    appliedCount:1,status:'open',contact:'032-933-7890',
+    emoji:'🦀',createdAt:'2026-04-10',
+  },
+];
+
+const TYPES   = ['전체','어류방역','양식장관리','수산물가공','해양조사','기타'];
+const REGIONS = ['전체','제주','부산','통영','여수','완도','강원','인천'];
+const REGION_KW = {
+  제주:['제주','구좌'],부산:['부산','기장'],통영:['통영'],
+  여수:['여수'],완도:['완도'],강원:['강원','양양','강릉'],인천:['인천','강화'],
+};
+
+/* ─── State ─────────────────────────────────────────────── */
+const S = {
+  type:'전체',region:'전체',sort:'최신순',q:'',
+  selected:null,
+  applied:JSON.parse(localStorage.getItem('aq_applied')||'[]'),
+  posted:JSON.parse(localStorage.getItem('aq_posted')||'[]'),
+};
+
+/* ─── Utils ─────────────────────────────────────────────── */
+const $  = id => document.getElementById(id);
+const fc = n  => n.toLocaleString('ko-KR')+'원';
+const fd = d  => d ? d.slice(5).replace('-','/') : '-';
+
+function allJobs(){ return [...JOBS, ...S.posted] }
+
+function filtered(){
+  let r = allJobs();
+  if(S.q){
+    const q=S.q.toLowerCase();
+    r=r.filter(j=>
+      j.title.toLowerCase().includes(q)||
+      j.centerName.toLowerCase().includes(q)||
+      j.location.toLowerCase().includes(q)||
+      j.description.toLowerCase().includes(q)||
+      j.skills.some(s=>s.toLowerCase().includes(q))
+    );
+  }
+  if(S.type!=='전체') r=r.filter(j=>j.type===S.type);
+  if(S.region!=='전체'){
+    const kw=REGION_KW[S.region]||[S.region];
+    r=r.filter(j=>kw.some(k=>j.location.includes(k)));
+  }
+  if(S.sort==='급여순') r.sort((a,b)=>b.wage-a.wage);
+  else if(S.sort==='마감임박순') r.sort((a,b)=>(a.endDate||'9999').localeCompare(b.endDate||'9999'));
+  else r.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  return r;
+}
+
+function isApplied(id){ return S.applied.some(a=>a.jobId===id) }
+
+/* ─── Render ─────────────────────────────────────────────── */
+function renderTypeChips(){
+  $('typeChips').innerHTML=TYPES.map(t=>`
+    <button class="chip${S.type===t?' on':''}" onclick="setType('${t}')">${t}</button>
+  `).join('');
+}
+function renderRegionChips(){
+  $('regionChips').innerHTML=REGIONS.map(r=>`
+    <button class="rchip${S.region===r?' on':''}" onclick="setRegion('${r}')">${r}</button>
+  `).join('');
+}
+
+function renderJobs(){
+  const jobs=filtered();
+  $('jCount').textContent=jobs.length;
+  if(!jobs.length){
+    $('jlist').innerHTML=`
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-txt">검색 결과가 없습니다</div>
+      </div>`;
+    return;
+  }
+  $('jlist').innerHTML=jobs.map(j=>{
+    const app=isApplied(j.id);
+    return `
+    <div class="jcard" onclick="openDetail('${j.id}')">
+      <div class="jcard-head">
+        <div class="jcard-meta">
+          <div class="jcard-badges">
+            <span class="badge badge-open">모집중</span>
+            <span class="badge badge-type">${j.type}</span>
+          </div>
+          <div class="jcard-title">${j.title}</div>
+          <div class="jcard-co">🏢 ${j.centerName}</div>
+        </div>
+        <span class="jcard-emoji">${j.emoji}</span>
+      </div>
+      <div class="jcard-desc">${j.description}</div>
+      <div class="igrid">
+        <div class="ibox" style="background:var(--blue-l)">
+          <div class="ibox-label" style="color:var(--blue)">📅 기간</div>
+          <div class="ibox-val">${fd(j.startDate)}</div>
+          <div class="ibox-sub">~ ${fd(j.endDate)}</div>
+        </div>
+        <div class="ibox" style="background:var(--green-l)">
+          <div class="ibox-label" style="color:var(--green)">💰 급여</div>
+          <div class="ibox-val">${fc(j.wage)}</div>
+          <div class="ibox-sub">${j.wageType}</div>
+        </div>
+        <div class="ibox" style="background:var(--amber-l)">
+          <div class="ibox-label" style="color:var(--amber)">📍 위치</div>
+          <div class="ibox-val" style="font-size:11px">${j.location}</div>
+        </div>
+        <div class="ibox" style="background:var(--purple-l)">
+          <div class="ibox-label" style="color:var(--purple)">👥 지원자</div>
+          <div class="ibox-val">${j.appliedCount}명</div>
+        </div>
+      </div>
+      <div class="skills">
+        ${j.skills.map(s=>`<span class="sk">${s}</span>`).join('')}
+      </div>
+      <button class="btn-apply ${app?'yes':'no'}"
+        onclick="event.stopPropagation();${app?'':` openApply('${j.id}')`}">
+        ${app?'✓ 지원 완료':'지원하기'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function renderMyApps(){
+  const apps=S.applied;
+  $('myapps').innerHTML=`
+    <div class="myapps-h">
+      <div class="form-h">내 지원 현황</div>
+      <div class="form-sub" style="margin-bottom:0">지원한 공고 ${apps.length}건</div>
+    </div>
+    ${!apps.length?`
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-txt">아직 지원한 공고가 없습니다</div>
+      </div>
+    `:apps.slice().reverse().map(a=>`
+      <div class="apcard">
+        <div class="apcard-top">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:900;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.jobTitle}</div>
+            <div style="font-size:12px;color:var(--t2)">${a.companyName}</div>
+          </div>
+          <span class="ap-status st-applied" style="margin-left:8px">지원완료</span>
+        </div>
+        <hr class="divider">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;color:var(--t3)">지원일 ${a.appliedAt}</div>
+          <div style="font-size:11px;color:var(--t2);font-weight:600">📍 ${a.location}</div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ─── Detail Modal ──────────────────────────────────────── */
+function openDetail(id){
+  const j=allJobs().find(x=>x.id===id);
+  if(!j) return;
+  S.selected=j;
+  const app=isApplied(j.id);
+  $('detailBody').innerHTML=`
+    <div class="detail-head">
+      <span class="detail-emoji">${j.emoji}</span>
+      <div>
+        <div class="jcard-badges" style="margin-bottom:5px">
+          <span class="badge badge-open">모집중</span>
+          <span class="badge badge-type">${j.type}</span>
+        </div>
+        <div class="detail-title">${j.title}</div>
+        <div class="detail-co">🏢 ${j.centerName}</div>
+      </div>
+    </div>
+
+    <div class="section-title">업무 내용</div>
+    <div class="detail-desc">${j.description}</div>
+
+    <div class="section-title">근무 조건</div>
+    <div class="igrid" style="margin-bottom:14px">
+      <div class="ibox" style="background:var(--blue-l)">
+        <div class="ibox-label" style="color:var(--blue)">📅 근무 기간</div>
+        <div class="ibox-val" style="font-size:11px">${j.startDate||'-'}</div>
+        <div class="ibox-sub">~ ${j.endDate||'-'}</div>
+      </div>
+      <div class="ibox" style="background:var(--green-l)">
+        <div class="ibox-label" style="color:var(--green)">💰 급여</div>
+        <div class="ibox-val">${fc(j.wage)}</div>
+        <div class="ibox-sub">${j.wageType}</div>
+      </div>
+      <div class="ibox" style="background:var(--amber-l)">
+        <div class="ibox-label" style="color:var(--amber)">📍 근무지</div>
+        <div class="ibox-val" style="font-size:11px">${j.location}</div>
+      </div>
+      <div class="ibox" style="background:var(--purple-l)">
+        <div class="ibox-label" style="color:var(--purple)">👥 지원자</div>
+        <div class="ibox-val">${j.appliedCount}명 지원중</div>
+      </div>
+    </div>
+
+    <div class="section-title">필요 기술</div>
+    <div class="skills" style="margin-bottom:14px">
+      ${j.skills.map(s=>`<span class="sk">${s}</span>`).join('')}
+    </div>
+
+    <div class="section-title">연락처</div>
+    <div class="contact-box">
+      <span style="font-size:22px">📞</span>
+      <div>
+        <div style="font-size:13px;font-weight:700">${j.centerName}</div>
+        <div style="font-size:15px;color:var(--blue);font-weight:700">${j.contact}</div>
+      </div>
+    </div>
+
+    <button class="btn-apply ${app?'yes':'no'}" style="margin-top:4px"
+      onclick="${app?'':` closeOv('detailOv'); setTimeout(()=>openApply('${j.id}'),200)`}">
+      ${app?'✓ 이미 지원한 공고입니다':'지원하기'}
+    </button>
+  `;
+  openOv('detailOv');
+}
+
+/* ─── Apply Modal ───────────────────────────────────────── */
+function openApply(id){
+  const j=allJobs().find(x=>x.id===id);
+  if(!j) return;
+  S.selected=j;
+  $('applyBody').innerHTML=`
+    <div style="font-size:20px;font-weight:900;margin-bottom:4px">지원하기</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:16px">${j.title} · ${j.centerName}</div>
+    <form onsubmit="doApply(event,'${j.id}')">
+      <div class="fg">
+        <label class="flabel">이름 *</label>
+        <input class="fi" id="an" placeholder="이름을 입력해주세요" required>
+      </div>
+      <div class="fg">
+        <label class="flabel">연락처 *</label>
+        <input class="fi" id="ap" type="tel" placeholder="010-1234-5678" required>
+      </div>
+      <div class="fg">
+        <label class="flabel">경력 사항</label>
+        <input class="fi" id="ae" placeholder="예: 수산 업계 5년, 양식장 관리 경험">
+      </div>
+      <div class="fg">
+        <label class="flabel">자기소개</label>
+        <textarea class="fta" id="ai" placeholder="간단한 자기소개를 입력해주세요" style="min-height:80px"></textarea>
+      </div>
+      <button type="submit" class="btn-primary">지원서 제출하기</button>
+    </form>
+  `;
+  openOv('applyOv');
+}
+
+function doApply(e,id){
+  e.preventDefault();
+  const j=allJobs().find(x=>x.id===id);
+  if(!j) return;
+  S.applied.push({
+    jobId:id,jobTitle:j.title,companyName:j.centerName,
+    location:j.location,
+    name:$('an').value,phone:$('ap').value,
+    appliedAt:new Date().toLocaleDateString('ko-KR'),
+  });
+  localStorage.setItem('aq_applied',JSON.stringify(S.applied));
+  closeOv('applyOv');
+  toast(`"${j.title}" 공고에 지원 완료!`,'ok');
+  renderJobs();
+}
+
+/* ─── Post Job ───────────────────────────────────────────── */
+function submitPost(e){
+  e.preventDefault();
+  const job={
+    id:'p'+Date.now(),
+    centerName:$('pco').value,centerId:'custom',
+    title:$('pt').value,type:$('pty').value,
+    description:$('pd').value,
+    startDate:$('ps').value,endDate:$('pe').value,
+    location:$('pl').value,
+    wage:parseInt($('pw').value)||0,wageType:$('pwt').value,
+    skills:$('psk').value.split(',').map(s=>s.trim()).filter(Boolean),
+    appliedCount:0,status:'open',contact:$('pc').value,
+    emoji:'📋',createdAt:new Date().toISOString().slice(0,10),
+  };
+  S.posted.push(job);
+  localStorage.setItem('aq_posted',JSON.stringify(S.posted));
+  e.target.reset();
+  toast('공고가 등록되었습니다!','ok');
+  goTab('jobs', document.querySelectorAll('.bnav-item')[0]);
+}
+
+/* ─── Tab switch ─────────────────────────────────────────── */
+function goTab(name, el){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  $('tab-'+name).classList.add('on');
+  if(name==='myapps') renderMyApps();
+}
+
+/* ─── Modal helpers ──────────────────────────────────────── */
+function openOv(id){ $(id).classList.add('on'); document.body.style.overflow='hidden' }
+function closeOv(id,ev){
+  if(ev && ev.target!=$(id)) return;
+  $(id).classList.remove('on');
+  document.body.style.overflow='';
+}
+
+/* ─── Actions ────────────────────────────────────────────── */
+function onSearch(v){ S.q=v; renderJobs() }
+function setType(t){ S.type=t; renderTypeChips(); renderJobs() }
+function setRegion(r){ S.region=r; renderRegionChips(); renderJobs() }
+function onSort(v){ S.sort=v; renderJobs() }
+
+/* ─── Toast ──────────────────────────────────────────────── */
+let _tt;
+function toast(msg,type=''){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ─── Init ───────────────────────────────────────────────── */
+renderTypeChips();
+renderRegionChips();
+renderJobs();
+</script>
+</body>
+</html>

@@ -20,7 +20,7 @@ class _CommerceScreenState extends State<CommerceScreen> {
       ..setNavigationDelegate(NavigationDelegate(
         onPageFinished: (_) => setState(() => _isLoading = false),
       ))
-      ..loadRequest(Uri.parse('https://www.google.com'));
+      ..loadRequest(Uri.parse('https://shopping.naver.com/ns/home'));
   }
 
   @override

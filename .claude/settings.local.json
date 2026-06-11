@@ -25,7 +25,9 @@
       "Bash(python -c \":*)",
       "Bash(flutter analyze:*)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(grep -E \"\\\\.dart$\")"
+      "Bash(grep -E \"\\\\.dart$\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\flutter\\\\aquaconnect_mobile\" -Directory)",
+      "Bash(Select-Object Name)"
     ]
   }
 }

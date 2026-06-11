@@ -15,7 +15,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
   Future<void> _handleSelect(String role) async {
     setState(() { _loading = true; _selected = role; });
-    await context.read<AppProvider>().selectRole(role);
+    context.read<AppProvider>().login(role);
   }
 
   @override

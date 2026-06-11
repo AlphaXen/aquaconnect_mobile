@@ -199,11 +199,11 @@ class _FishGalleryScreenState extends State<FishGalleryScreen> {
                     CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         color: const Color(0xFFE5E7EB),
                         child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                       ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: const Color(0xFFF3F4F6),
                         child: const Icon(Icons.broken_image, color: Color(0xFF9CA3AF)),
                       ),
@@ -312,10 +312,10 @@ class _PhotoViewScreenState extends State<_PhotoViewScreen> {
               child: CachedNetworkImage(
                 imageUrl: url,
                 fit: BoxFit.contain,
-                placeholder: (_, __) => const Center(
+                placeholder: (_, _) => const Center(
                   child: CircularProgressIndicator(color: Colors.white),
                 ),
-                errorWidget: (_, __, ___) => const Center(
+                errorWidget: (_, _, _) => const Center(
                   child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
                 ),
               ),

@@ -1,8 +1,10 @@
 class AppUser {
   final String id;
-  final String role;
+  final String? role;
   final String name;
   final String email;
+  final bool isAdmin;
+  final String status;
 
   // Farm fields
   final String? ownerName;
@@ -17,9 +19,11 @@ class AppUser {
 
   const AppUser({
     required this.id,
-    required this.role,
+    this.role,
     required this.name,
     required this.email,
+    this.isAdmin = false,
+    this.status = 'pending',
     this.ownerName,
     this.totalTanks,
     this.totalFish,

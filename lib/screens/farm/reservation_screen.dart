@@ -31,7 +31,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
   List<String> _selectedTanks = [];
   String _notes = '';
   Reservation? _submitted;
-  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -63,7 +62,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
   }
 
   Future<void> _submit(BuildContext context, List<Tank> myTanks) async {
-    setState(() => _isSubmitting = true);
     final res = await context.read<AppProvider>().createReservationApi(
       centerId: _centerId, centerName: _centerName,
       scheduledDate: _date, scheduledTime: _time,
@@ -71,7 +69,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       totalFish: _totalFishSelected(myTanks), notes: _notes,
       serviceAmount: _serviceAmount, commissionAmount: _commissionAmount,
     );
-    if (mounted) setState(() { _submitted = res; _isSubmitting = false; });
+    if (mounted) setState(() => _submitted = res);
   }
 
   @override

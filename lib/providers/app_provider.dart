@@ -12,6 +12,9 @@ class AppProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   bool _isInitializing = true;
   ThemeMode _themeMode = ThemeMode.system;
+  bool _isAdmin = false;
+  List<Map<String, dynamic>> _allUsers = [];
+  bool _isLoadingUsers = false;
 
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
@@ -32,6 +35,10 @@ class AppProvider extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitializing => _isInitializing;
   bool get isFirebaseLoggedIn => _auth.currentUser != null;
+  bool get isAdmin => _isAdmin;
+  bool get isPendingApproval => isFirebaseLoggedIn && !_isLoggedIn && !_isAdmin;
+  List<Map<String, dynamic>> get allUsers => _allUsers;
+  bool get isLoadingUsers => _isLoadingUsers;
   ThemeMode get themeMode => _themeMode;
   List<Tank> get tanks => _tanks;
   List<Reservation> get reservations => _reservations;
@@ -43,10 +50,29 @@ class AppProvider extends ChangeNotifier {
   List<AquaCenter> get centers => _centers;
   bool get isLoadingReservations => _isLoadingReservations;
 
-  /// 앱 시작 시 항상 로그아웃 → 매번 로그인 화면 표시
+  /// 앱 시작 시 Firebase 세션 확인 → 기존 로그인 복원
   Future<void> initialize() async {
-    await _auth.signOut();
-    await _googleSignIn.signOut();
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser != null) {
+      try {
+        final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+        if (doc.exists) {
+          final data = doc.data()!;
+          final role = data['role'] as String?;
+          final isAdmin = data['isAdmin'] as bool? ?? false;
+          // status 필드 없는 기존 사용자: role 있으면 approved로 간주
+          final status = data['status'] as String? ?? (role != null ? 'approved' : 'pending');
+
+          _currentUser = _buildAppUser(firebaseUser, role, status, isAdmin);
+          _isAdmin = isAdmin;
+          if (isAdmin || (role != null && status == 'approved')) {
+            _isLoggedIn = !isAdmin;
+          }
+        }
+      } catch (_) {
+        // Firestore 실패 → 로그인 화면으로 (Firebase 세션은 유지됨)
+      }
+    }
     _isInitializing = false;
     notifyListeners();
   }
@@ -64,12 +90,32 @@ class AppProvider extends ChangeNotifier {
       final result = await _auth.signInWithCredential(credential);
       final firebaseUser = result.user!;
 
-      // Firestore에서 기존 사용자 역할 조회
       final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      if (doc.exists && doc.data()?['role'] != null) {
-        final role = doc.data()!['role'] as String;
-        _currentUser = _buildAppUser(firebaseUser, role);
-        _isLoggedIn = true;
+      if (doc.exists) {
+        final data = doc.data()!;
+        final role = data['role'] as String?;
+        final isAdmin = data['isAdmin'] as bool? ?? false;
+        final status = data['status'] as String? ?? (role != null ? 'approved' : 'pending');
+
+        _currentUser = _buildAppUser(firebaseUser, role, status, isAdmin);
+        _isAdmin = isAdmin;
+        if (isAdmin || (role != null && status == 'approved')) {
+          _isLoggedIn = !isAdmin;
+        }
+      } else {
+        // 신규 사용자 → pending 상태로 Firestore 문서 생성
+        await _firestore.collection('users').doc(firebaseUser.uid).set({
+          'uid': firebaseUser.uid,
+          'email': firebaseUser.email ?? '',
+          'name': firebaseUser.displayName ?? '',
+          'role': null,
+          'status': 'pending',
+          'isAdmin': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        _currentUser = _buildAppUser(firebaseUser, null, 'pending', false);
+        _isAdmin = false;
       }
 
       notifyListeners();
@@ -79,30 +125,19 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  /// 역할 선택 완료 → Firestore에 사용자 데이터 저장 후 앱 진입
-  Future<void> selectRole(String role) async {
-    final firebaseUser = _auth.currentUser;
-    if (firebaseUser == null) return;
-
-    await _firestore.collection('users').doc(firebaseUser.uid).set({
-      'uid': firebaseUser.uid,
-      'email': firebaseUser.email ?? '',
-      'name': firebaseUser.displayName ?? '',
-      'role': role,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-
-    _currentUser = _buildAppUser(firebaseUser, role);
-    _isLoggedIn = true;
-    notifyListeners();
-  }
-
-  AppUser _buildAppUser(User firebaseUser, String role) {
+  AppUser _buildAppUser(
+    User firebaseUser,
+    String? role,
+    String status,
+    bool isAdmin,
+  ) {
     return AppUser(
       id: firebaseUser.uid,
       role: role,
-      name: firebaseUser.displayName ?? (role == 'farm' ? '양식장 관리자' : '수산질병관리원'),
+      name: firebaseUser.displayName ?? '사용자',
       email: firebaseUser.email ?? '',
+      isAdmin: isAdmin,
+      status: status,
     );
   }
 
@@ -111,9 +146,100 @@ class AppProvider extends ChangeNotifier {
     await _googleSignIn.signOut();
     _currentUser = null;
     _isLoggedIn = false;
+    _isAdmin = false;
+    _allUsers = [];
     _farmProfile = null;
     _centerProfile = null;
     notifyListeners();
+  }
+
+  /// 관리자 전용: 사용자에게 역할 배정
+  Future<void> assignRole(String targetUid, String role) async {
+    if (!_isAdmin) return;
+    final adminUid = _auth.currentUser?.uid;
+    await _firestore.collection('users').doc(targetUid).update({
+      'role': role,
+      'status': 'approved',
+      'approvedBy': adminUid,
+      'approvedAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    _allUsers = _allUsers.map((u) {
+      if (u['uid'] == targetUid) {
+        return {...u, 'role': role, 'status': 'approved'};
+      }
+      return u;
+    }).toList();
+    showToast('역할이 배정되었습니다.');
+    notifyListeners();
+  }
+
+  /// 관리자 전용: 역할 취소 (pending으로 되돌림)
+  Future<void> revokeRole(String targetUid) async {
+    if (!_isAdmin) return;
+    await _firestore.collection('users').doc(targetUid).update({
+      'role': null,
+      'status': 'pending',
+      'approvedBy': null,
+      'approvedAt': null,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    _allUsers = _allUsers.map((u) {
+      if (u['uid'] == targetUid) {
+        return {...u, 'role': null, 'status': 'pending'};
+      }
+      return u;
+    }).toList();
+    showToast('역할이 취소되었습니다.', type: 'info');
+    notifyListeners();
+  }
+
+  /// 관리자 전용: 전체 사용자 목록 로드
+  Future<void> loadAllUsers() async {
+    if (!_isAdmin) return;
+    _isLoadingUsers = true;
+    notifyListeners();
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .orderBy('createdAt', descending: true)
+          .get();
+      _allUsers = snapshot.docs
+          .map((doc) => {'uid': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      showToast('사용자 목록 로드 실패', type: 'error');
+    } finally {
+      _isLoadingUsers = false;
+      notifyListeners();
+    }
+  }
+
+  /// 대기 화면에서 승인 여부 재확인
+  Future<void> refreshUserStatus() async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return;
+    try {
+      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        final role = data['role'] as String?;
+        final isAdmin = data['isAdmin'] as bool? ?? false;
+        final status = data['status'] as String? ?? (role != null ? 'approved' : 'pending');
+
+        _currentUser = _buildAppUser(firebaseUser, role, status, isAdmin);
+        _isAdmin = isAdmin;
+        if (isAdmin || (role != null && status == 'approved')) {
+          _isLoggedIn = !isAdmin;
+          showToast('승인되었습니다! 서비스를 이용하세요.');
+        } else {
+          showToast('아직 승인 대기 중입니다.', type: 'info');
+        }
+        notifyListeners();
+      }
+    } catch (_) {
+      showToast('확인 중 오류가 발생했습니다.', type: 'error');
+    }
   }
 
   /// 개발용 mock 로그인 (Firebase 없이 테스트)
@@ -421,8 +547,8 @@ class AppProvider extends ChangeNotifier {
       healthy: ft.where((t) => t.status == 'healthy').length,
       warning: ft.where((t) => t.status == 'warning').length,
       danger: ft.where((t) => t.status == 'danger').length,
-      totalFish: ft.fold(0, (sum, t) => sum + t.totalFish),
-      totalInjured: ft.fold(0, (sum, t) => sum + t.injuredFish),
+      totalFish: ft.fold(0, (acc, t) => acc + t.totalFish),
+      totalInjured: ft.fold(0, (acc, t) => acc + t.injuredFish),
     );
   }
 
